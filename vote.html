@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Election Portal - Vote</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <p class="campaign-badge">Election Portal</p>
+      <h1>Choose Your Party</h1>
+      <p class="hero-subtext">One voter, one ballot. Review each party card before confirming.</p>
+      <p id="welcome"></p>
+      <p id="message"></p>
+      <div id="partyGrid" class="party-grid"></div>
+    </div>
+    <div id="voteModal" class="modal-overlay hidden">
+      <div class="modal-card">
+        <p class="modal-tag">Election Confirmation</p>
+        <h2>Confirm Your Vote</h2>
+        <p id="modalText"></p>
+        <p class="modal-note">Your ballot is final and cannot be changed after confirmation.</p>
+        <div class="modal-actions">
+          <button id="cancelVoteButton" class="secondary">Cancel</button>
+          <button id="confirmVoteButton">Confirm Vote</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+      const currentUser = getCurrentUser();
+      const welcome = document.getElementById("welcome");
+      const message = document.getElementById("message");
+      const partyGrid = document.getElementById("partyGrid");
+      const voteModal = document.getElementById("voteModal");
+      const modalText = document.getElementById("modalText");
+      const cancelVoteButton = document.getElementById("cancelVoteButton");
+      const confirmVoteButton = document.getElementById("confirmVoteButton");
+      let pendingVote = null;
+
+      if (!currentUser) {
+        window.location.href = "index.html";
+      } else {
+        welcome.textContent = `Welcome, ${currentUser.name}. Pick one party to vote for.`;
+      }
+
+      function openVoteModal(partyId, partyName, button) {
+        pendingVote = { partyId, partyName, button };
+        modalText.textContent = `Are you sure you want to vote for ${partyName}?`;
+        voteModal.classList.remove("hidden");
+      }
+
+      function closeVoteModal() {
+        pendingVote = null;
+        voteModal.classList.add("hidden");
+      }
+
+      cancelVoteButton.addEventListener("click", closeVoteModal);
+      voteModal.addEventListener("click", (event) => {
+        if (event.target === voteModal) {
+          closeVoteModal();
+        }
+      });
+
+      confirmVoteButton.addEventListener("click", async () => {
+        if (!pendingVote) {
+          return;
+        }
+        try {
+          confirmVoteButton.disabled = true;
+          pendingVote.button.disabled = true;
+          const voteData = await api.submitVote({
+            name: currentUser.name,
+            id_number: currentUser.id_number,
+            party_id: pendingVote.partyId
+          });
+          currentUser.has_voted = true;
+          currentUser.vote_timestamp = voteData.vote.timestamp;
+          saveCurrentUser(currentUser);
+          window.location.href = "results.html?fromVote=1";
+        } catch (error) {
+          message.className = "error";
+          message.textContent = error.message;
+          pendingVote.button.disabled = false;
+          closeVoteModal();
+        } finally {
+          confirmVoteButton.disabled = false;
+        }
+      });
+
+      async function loadParties() {
+        try {
+          const settingsData = await api.getSettings();
+          if ((settingsData.settings.election_status || "").toLowerCase() !== "open") {
+            message.className = "error";
+            message.textContent = "Election is currently closed.";
+            return;
+          }
+
+          const data = await api.getParties();
+          partyGrid.innerHTML = "";
+          data.parties.forEach((party) => {
+            const card = document.createElement("div");
+            card.className = "card party-card";
+            const imagePath = party.image_path || party.logo_url || "";
+            card.innerHTML = `
+              <img src="${imagePath}" alt="${party.party_name} logo" />
+              <h3>${party.party_name}</h3>
+              <p><strong>Slogan:</strong> ${party.slogan}</p>
+              <p>${party.description}</p>
+              <p><strong>Leader:</strong> ${party.leader_name}</p>
+              <button data-party-id="${party.party_id}" data-party-name="${party.party_name}">Vote for this party</button>
+            `;
+            partyGrid.appendChild(card);
+          });
+
+          document.querySelectorAll("button[data-party-id]").forEach((button) => {
+            button.addEventListener("click", () => {
+              const partyId = button.getAttribute("data-party-id");
+              const partyName = button.getAttribute("data-party-name");
+              openVoteModal(partyId, partyName, button);
+            });
+          });
+        } catch (error) {
+          message.className = "error";
+          message.textContent = error.message;
+        }
+      }
+
+      loadParties();
+    </script>
+  </body>
+</html>

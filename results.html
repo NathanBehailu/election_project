@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Election Portal - Results</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <p class="campaign-badge">Election Portal</p>
+      <h1>Live Election Results</h1>
+      <p class="hero-subtext">Ballot counts update as votes are submitted.</p>
+      <p id="message"></p>
+      <div id="resultChart" class="results-chart"></div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+      const message = document.getElementById("message");
+      const resultChart = document.getElementById("resultChart");
+
+      function showSuccessFromVote() {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("fromVote") === "1") {
+          message.className = "success";
+          message.textContent = "Thank you! Your vote was recorded successfully.";
+        }
+      }
+
+      async function loadResults() {
+        try {
+          const data = await api.getResults();
+          const totalVotes = data.summary.total_votes;
+          resultChart.innerHTML = "";
+          data.results.forEach((item) => {
+            const row = document.createElement("div");
+            row.className = "chart-item";
+            const percentage = Number(item.percentage || 0);
+            row.innerHTML = `
+              <div class="chart-header">
+                <h3>${item.party_name}</h3>
+                <span class="chart-percent">${percentage}%</span>
+              </div>
+              <div class="bar-wrap"><div class="bar" style="width:${percentage}%"></div></div>
+              <p class="chart-meta">${item.vote_count} vote(s)</p>
+            `;
+            resultChart.appendChild(row);
+          });
+
+          if (totalVotes === 0) {
+            resultChart.innerHTML = `<div class="card"><p>No votes yet. Be the first to vote.</p></div>`;
+          }
+        } catch (error) {
+          message.className = "error";
+          message.textContent = error.message;
+        }
+      }
+
+      showSuccessFromVote();
+      loadResults();
+    </script>
+  </body>
+</html>

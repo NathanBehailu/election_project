@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Election Portal - Login</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <section class="portal-hero">
+        <p class="campaign-badge">Election Portal</p>
+        <h1>Cast Your Vote</h1>
+        <p class="hero-subtext">Secure student voting with one ballot per voter.</p>
+      </section>
+
+      <div class="card login-card">
+        <div class="ballot-mark">Ballot Ready</div>
+        <label for="nameInput">Full Name</label>
+        <input id="nameInput" placeholder="Enter your full name" />
+
+        <label for="idInput">ID Number</label>
+        <input id="idInput" placeholder="Enter your ID number" />
+
+        <button id="loginButton">Enter Election Portal</button>
+        <p id="message"></p>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+      const nameInput = document.getElementById("nameInput");
+      const idInput = document.getElementById("idInput");
+      const loginButton = document.getElementById("loginButton");
+      const message = document.getElementById("message");
+
+      loginButton.addEventListener("click", async () => {
+        message.className = "";
+        message.textContent = "";
+        const name = nameInput.value.trim();
+        const id_number = idInput.value.trim();
+
+        if (!name || !id_number) {
+          message.className = "error";
+          message.textContent = "Please enter both name and ID number.";
+          return;
+        }
+
+        try {
+          loginButton.disabled = true;
+          const data = await api.loginUser({ name, id_number });
+          saveCurrentUser(data.user);
+          if (data.user.has_voted) {
+            message.className = "success";
+            message.textContent = "You already voted. Sending you to results...";
+            setTimeout(() => (window.location.href = "results.html"), 900);
+            return;
+          }
+          window.location.href = "vote.html";
+        } catch (error) {
+          message.className = "error";
+          message.textContent = error.message;
+        } finally {
+          loginButton.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>

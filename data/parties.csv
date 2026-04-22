@@ -1,0 +1,5 @@
+party_id,party_name,slogan,description,leader_name,image_path,party_color,is_active
+P1,Prosperity Party (PP),Medemer (Synergy),The ruling political party in Ethiopia formed in 2019 by merging three former EPRDF member parties and several regional parties.,Abiy Ahmed Ali,images/pp.png,Blue and Yellow,True
+P2,Ethiopian Citizens for Social Justice (EZEMA),"Justice, Equality, and Prosperity","A prominent national opposition party established in 2019, advocating for civic nationalism, social justice, and constitutional reform.",Berhanu Nega,images/ezema.jpeg,Green and Yellow,True
+P3,National Movement of Amhara (NaMA),Defending Amhara Interests,"An ethnic-based political party established in the Amhara Region to advocate for the political, economic, and social rights of the Amhara people.",Belete Molla,images/nama.jpeg,Red and Yellow,True
+P7,Enat Party,Motherland First,"A pan-Ethiopian national political party focusing on national unity, sovereignty, and socio-economic development.",Seifeselassie Ayalew,images/enat.jpeg,Blue and White,True

@@ -1,0 +1,92 @@
+-- Run this in Supabase SQL Editor.
+-- It creates tables equivalent to your CSV files and seeds current data.
+
+begin;
+
+create table if not exists public.users (
+  user_id bigint primary key,
+  name text not null,
+  id_number text not null unique,
+  has_voted boolean not null default false,
+  vote_timestamp timestamptz null
+);
+
+create table if not exists public.parties (
+  party_id text primary key,
+  party_name text not null,
+  slogan text not null,
+  description text not null,
+  leader_name text not null,
+  image_path text not null,
+  party_color text not null,
+  is_active boolean not null default true
+);
+
+create table if not exists public.votes (
+  party_id text primary key references public.parties(party_id) on delete cascade,
+  party_name text not null,
+  vote_count integer not null default 0 check (vote_count >= 0)
+);
+
+create table if not exists public.settings (
+  key text primary key,
+  value text not null
+);
+
+insert into public.users (user_id, name, id_number, has_voted, vote_timestamp) values
+  (1, 'Abebe Kebede', '1001', true, '2026-04-21T16:20:53.642Z'),
+  (2, 'Hana Tesfaye', '1002', true, '2026-04-21T16:37:11.774Z'),
+  (3, 'Dawit Alemu', '1003', true, '2026-04-21T16:38:21.635Z'),
+  (4, 'Selamawit Girma', '1004', false, null),
+  (5, 'Yonas Getachew', '1005', false, null),
+  (6, 'Eden Mekonnen', '1006', false, null),
+  (7, 'Samuel Bekele', '1007', true, '2026-04-22T14:35:08.559Z'),
+  (8, 'Bethlehem Teshome', '1008', false, null),
+  (9, 'Natnael Habte', '1009', true, '2026-04-22T14:31:35.317Z'),
+  (10, 'Rahel Hailu', '1010', false, null),
+  (11, 'Biruk Tadesse', '1011', false, null),
+  (12, 'Meron Abate', '1012', false, null),
+  (13, 'Henok Desta', '1013', false, null),
+  (14, 'Ruth Tesema', '1014', false, null),
+  (15, 'Elias Binyam', '1015', false, null),
+  (16, 'Tigist Alemayehu', '1016', false, null),
+  (17, 'Fikadu Zerihun', '1017', false, null),
+  (18, 'Genet Asfaw', '1018', false, null),
+  (19, 'Nahom Teklu', '1019', false, null),
+  (20, 'Marta Yohannes', '1020', false, null)
+on conflict (user_id) do update set
+  name = excluded.name,
+  id_number = excluded.id_number,
+  has_voted = excluded.has_voted,
+  vote_timestamp = excluded.vote_timestamp;
+
+insert into public.parties (party_id, party_name, slogan, description, leader_name, image_path, party_color, is_active) values
+  ('P1', 'Prosperity Party (PP)', 'Medemer (Synergy)', 'The ruling political party in Ethiopia formed in 2019 by merging three former EPRDF member parties and several regional parties.', 'Abiy Ahmed Ali', 'images/pp.png', 'Blue and Yellow', true),
+  ('P2', 'Ethiopian Citizens for Social Justice (EZEMA)', 'Justice, Equality, and Prosperity', 'A prominent national opposition party established in 2019, advocating for civic nationalism, social justice, and constitutional reform.', 'Berhanu Nega', 'images/ezema.jpeg', 'Green and Yellow', true),
+  ('P3', 'National Movement of Amhara (NaMA)', 'Defending Amhara Interests', 'An ethnic-based political party established in the Amhara Region to advocate for the political, economic, and social rights of the Amhara people.', 'Belete Molla', 'images/nama.jpeg', 'Red and Yellow', true),
+  ('P7', 'Enat Party', 'Motherland First', 'A pan-Ethiopian national political party focusing on national unity, sovereignty, and socio-economic development.', 'Seifeselassie Ayalew', 'images/enat.jpeg', 'Blue and White', true)
+on conflict (party_id) do update set
+  party_name = excluded.party_name,
+  slogan = excluded.slogan,
+  description = excluded.description,
+  leader_name = excluded.leader_name,
+  image_path = excluded.image_path,
+  party_color = excluded.party_color,
+  is_active = excluded.is_active;
+
+insert into public.votes (party_id, party_name, vote_count) values
+  ('P1', 'Prosperity Party (PP)', 2),
+  ('P2', 'Ethiopian Citizens for Social Justice (EZEMA)', 1),
+  ('P3', 'National Movement of Amhara (NaMA)', 1),
+  ('P7', 'Enat Party', 1)
+on conflict (party_id) do update set
+  party_name = excluded.party_name,
+  vote_count = excluded.vote_count;
+
+insert into public.settings (key, value) values
+  ('election_status', 'open'),
+  ('results_visible', 'TRUE')
+on conflict (key) do update set
+  value = excluded.value;
+
+commit;

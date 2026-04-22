@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>School Election - Admin</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Admin Controls</h1>
+      <div class="card">
+        <label for="statusSelect">Election Status</label>
+        <select id="statusSelect">
+          <option value="not_started">Not Started</option>
+          <option value="open">Open</option>
+          <option value="closed">Closed</option>
+        </select>
+
+        <label for="resultsVisibleSelect">Results Visibility</label>
+        <select id="resultsVisibleSelect">
+          <option value="TRUE">Visible</option>
+          <option value="FALSE">Hidden</option>
+        </select>
+
+        <button id="saveButton">Save Settings</button>
+        <p id="message"></p>
+      </div>
+      <button class="secondary" onclick="window.location.href='results.html'">Back to Results</button>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+      const statusSelect = document.getElementById("statusSelect");
+      const resultsVisibleSelect = document.getElementById("resultsVisibleSelect");
+      const saveButton = document.getElementById("saveButton");
+      const message = document.getElementById("message");
+
+      async function loadSettings() {
+        try {
+          const data = await api.getSettings();
+          statusSelect.value = data.settings.election_status || "open";
+          resultsVisibleSelect.value = data.settings.results_visible || "TRUE";
+        } catch (error) {
+          message.className = "error";
+          message.textContent = error.message;
+        }
+      }
+
+      saveButton.addEventListener("click", async () => {
+        message.className = "";
+        message.textContent = "";
+        try {
+          saveButton.disabled = true;
+          await api.updateSettings({
+            election_status: statusSelect.value,
+            results_visible: resultsVisibleSelect.value === "TRUE"
+          });
+          message.className = "success";
+          message.textContent = "Settings updated successfully.";
+        } catch (error) {
+          message.className = "error";
+          message.textContent = error.message;
+        } finally {
+          saveButton.disabled = false;
+        }
+      });
+
+      loadSettings();
+    </script>
+  </body>
+</html>

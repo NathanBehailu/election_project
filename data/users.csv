@@ -1,0 +1,21 @@
+user_id,name,id_number,has_voted,vote_timestamp
+1,Abebe Kebede,1001,TRUE,2026-04-21T16:20:53.642Z
+2,Hana Tesfaye,1002,TRUE,2026-04-21T16:37:11.774Z
+3,Dawit Alemu,1003,TRUE,2026-04-21T16:38:21.635Z
+4,Selamawit Girma,1004,FALSE,
+5,Yonas Getachew,1005,FALSE,
+6,Eden Mekonnen,1006,FALSE,
+7,Samuel Bekele,1007,TRUE,2026-04-22T14:35:08.559Z
+8,Bethlehem Teshome,1008,FALSE,
+9,Natnael Habte,1009,TRUE,2026-04-22T14:31:35.317Z
+10,Rahel Hailu,1010,FALSE,
+11,Biruk Tadesse,1011,FALSE,
+12,Meron Abate,1012,FALSE,
+13,Henok Desta,1013,FALSE,
+14,Ruth Tesema,1014,FALSE,
+15,Elias Binyam,1015,FALSE,
+16,Tigist Alemayehu,1016,FALSE,
+17,Fikadu Zerihun,1017,FALSE,
+18,Genet Asfaw,1018,FALSE,
+19,Nahom Teklu,1019,FALSE,
+20,Marta Yohannes,1020,FALSE,
