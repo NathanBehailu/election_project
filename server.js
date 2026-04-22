@@ -1,9 +1,10 @@
+require("dotenv").config({ override: true });
 const express = require("express");
 const { createClient } = require("@supabase/supabase-js");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_URL = String(process.env.SUPABASE_URL || "").replace(/\/rest\/v1\/?$/, "");
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
@@ -248,6 +249,10 @@ app.put("/api/settings", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Election app running at http://localhost:${PORT}`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Election app running at http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;
