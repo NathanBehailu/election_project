@@ -14,6 +14,9 @@ const api = {
   loginUser(payload) {
     return this.request("/api/login", "POST", payload);
   },
+  registerUser(payload) {
+    return this.request("/api/register", "POST", payload);
+  },
   getParties() {
     return this.request("/api/parties");
   },

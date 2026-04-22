@@ -69,6 +69,78 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
+app.post("/api/register", async (req, res) => {
+  try {
+    const rawUserId = String(req.body.user_id || "").trim();
+    const name = String(req.body.name || "").trim();
+    const idNumber = String(req.body.id_number || "").trim();
+    const userId = Number.parseInt(rawUserId, 10);
+
+    if (!rawUserId || !name || !idNumber) {
+      return res
+        .status(400)
+        .json({ success: false, message: "User ID, name, and ID number are required." });
+    }
+    if (!Number.isInteger(userId) || userId <= 0 || String(userId) !== rawUserId) {
+      return res.status(400).json({ success: false, message: "User ID must be a positive integer." });
+    }
+
+    const { data: existingUserById, error: existingUserByIdError } = await supabase
+      .from("users")
+      .select("user_id")
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (existingUserByIdError) throw existingUserByIdError;
+    if (existingUserById) {
+      return res.status(409).json({ success: false, message: "User ID already exists." });
+    }
+
+    const { data: existingUserByIdNumber, error: existingUserByIdNumberError } = await supabase
+      .from("users")
+      .select("id_number")
+      .eq("id_number", idNumber)
+      .maybeSingle();
+    if (existingUserByIdNumberError) throw existingUserByIdNumberError;
+    if (existingUserByIdNumber) {
+      return res.status(409).json({ success: false, message: "ID number already exists." });
+    }
+
+    const { data: user, error: createError } = await supabase
+      .from("users")
+      .insert({
+        user_id: userId,
+        name,
+        id_number: idNumber,
+        has_voted: false,
+        vote_timestamp: null
+      })
+      .select("user_id,name,id_number,has_voted,vote_timestamp")
+      .single();
+    if (createError) {
+      if (createError.code === "23505") {
+        return res.status(409).json({ success: false, message: "User ID or ID number already exists." });
+      }
+      throw createError;
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: "Account created successfully.",
+      user: {
+        user_id: user.user_id,
+        name: user.name,
+        id_number: user.id_number,
+        has_voted: toBool(user.has_voted),
+        vote_timestamp: user.vote_timestamp || ""
+      }
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, message: "Could not create account.", error: error.message });
+  }
+});
+
 app.get("/api/parties", async (_req, res) => {
   try {
     const { data: activeParties, error } = await supabase

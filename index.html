@@ -24,6 +24,21 @@
 
         <button id="loginButton">Enter Election Portal</button>
         <p id="message"></p>
+
+        <hr />
+
+        <h2>Create New Account</h2>
+        <label for="registerUserIdInput">User ID</label>
+        <input id="registerUserIdInput" placeholder="Enter a unique numeric user ID" />
+
+        <label for="registerNameInput">Full Name</label>
+        <input id="registerNameInput" placeholder="Enter your full name" />
+
+        <label for="registerIdInput">ID Number</label>
+        <input id="registerIdInput" placeholder="Enter your ID number" />
+
+        <button id="registerButton">Create Account</button>
+        <p id="registerMessage"></p>
       </div>
     </div>
 
@@ -33,6 +48,11 @@
       const idInput = document.getElementById("idInput");
       const loginButton = document.getElementById("loginButton");
       const message = document.getElementById("message");
+      const registerUserIdInput = document.getElementById("registerUserIdInput");
+      const registerNameInput = document.getElementById("registerNameInput");
+      const registerIdInput = document.getElementById("registerIdInput");
+      const registerButton = document.getElementById("registerButton");
+      const registerMessage = document.getElementById("registerMessage");
 
       loginButton.addEventListener("click", async () => {
         message.className = "";
@@ -62,6 +82,35 @@
           message.textContent = error.message;
         } finally {
           loginButton.disabled = false;
+        }
+      });
+
+      registerButton.addEventListener("click", async () => {
+        registerMessage.className = "";
+        registerMessage.textContent = "";
+
+        const user_id = registerUserIdInput.value.trim();
+        const name = registerNameInput.value.trim();
+        const id_number = registerIdInput.value.trim();
+
+        if (!user_id || !name || !id_number) {
+          registerMessage.className = "error";
+          registerMessage.textContent = "Please enter user ID, name, and ID number.";
+          return;
+        }
+
+        try {
+          registerButton.disabled = true;
+          const data = await api.registerUser({ user_id, name, id_number });
+          saveCurrentUser(data.user);
+          registerMessage.className = "success";
+          registerMessage.textContent = "Account created. Redirecting to ballot...";
+          setTimeout(() => (window.location.href = "vote.html"), 900);
+        } catch (error) {
+          registerMessage.className = "error";
+          registerMessage.textContent = error.message;
+        } finally {
+          registerButton.disabled = false;
         }
       });
     </script>

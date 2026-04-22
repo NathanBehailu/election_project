@@ -4,6 +4,7 @@
 begin;
 
 create table if not exists public.users (
+  -- user_id is manually assigned by the app signup flow and must remain unique.
   user_id bigint primary key,
   name text not null,
   id_number text not null unique,
