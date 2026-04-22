@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Election Portal - Create Account</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <section class="portal-hero">
+        <p class="campaign-badge">Election Portal</p>
+        <h1>Create Your Account</h1>
+        <p class="hero-subtext">Register once to get access to your ballot.</p>
+      </section>
+
+      <div class="card login-card">
+        <div class="ballot-mark">New Voter</div>
+        <label for="signupNameInput">Full Name</label>
+        <input id="signupNameInput" placeholder="Enter your full name" />
+
+        <label for="signupIdInput">ID Number</label>
+        <input id="signupIdInput" placeholder="Enter your ID number" />
+
+        <button id="signupButton">Create Account</button>
+        <p id="signupMessage"></p>
+        <p>
+          Already have an account?
+          <a href="index.html">Back to login</a>.
+        </p>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+      const signupNameInput = document.getElementById("signupNameInput");
+      const signupIdInput = document.getElementById("signupIdInput");
+      const signupButton = document.getElementById("signupButton");
+      const signupMessage = document.getElementById("signupMessage");
+
+      signupButton.addEventListener("click", async () => {
+        signupMessage.className = "";
+        signupMessage.textContent = "";
+
+        const name = signupNameInput.value.trim();
+        const id_number = signupIdInput.value.trim();
+
+        if (!name || !id_number) {
+          signupMessage.className = "error";
+          signupMessage.textContent = "Please enter both name and ID number.";
+          return;
+        }
+
+        try {
+          signupButton.disabled = true;
+          const data = await api.registerUser({ name, id_number });
+          saveCurrentUser(data.user);
+          signupMessage.className = "success";
+          signupMessage.textContent = "Account created. Redirecting to ballot...";
+          setTimeout(() => (window.location.href = "vote.html"), 900);
+        } catch (error) {
+          signupMessage.className = "error";
+          signupMessage.textContent = error.message;
+        } finally {
+          signupButton.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>
