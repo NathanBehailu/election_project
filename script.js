@@ -1,3 +1,47 @@
+const FULL_NAME_REGEX = /^[A-Za-z]+(?:[ '-][A-Za-z]+)*$/;
+const ID_NUMBER_REGEX = /^\d+$/;
+
+const FULL_NAME_MIN_LENGTH = 2;
+const FULL_NAME_MAX_LENGTH = 100;
+const ID_NUMBER_MAX_LENGTH = 20;
+
+function validateFullName(name) {
+  const trimmed = String(name || "").trim();
+  if (!trimmed) {
+    return { ok: false, message: "Please enter your full name." };
+  }
+  if (trimmed.length < FULL_NAME_MIN_LENGTH || trimmed.length > FULL_NAME_MAX_LENGTH) {
+    return {
+      ok: false,
+      message: `Full name must be between ${FULL_NAME_MIN_LENGTH} and ${FULL_NAME_MAX_LENGTH} characters.`
+    };
+  }
+  if (!FULL_NAME_REGEX.test(trimmed)) {
+    return {
+      ok: false,
+      message: "Full name may only contain letters, spaces, hyphens, and apostrophes."
+    };
+  }
+  return { ok: true, value: trimmed };
+}
+
+function validateIdNumber(id) {
+  const trimmed = String(id || "").trim();
+  if (!trimmed) {
+    return { ok: false, message: "Please enter your ID number." };
+  }
+  if (trimmed.length > ID_NUMBER_MAX_LENGTH) {
+    return {
+      ok: false,
+      message: `ID number must be at most ${ID_NUMBER_MAX_LENGTH} digits.`
+    };
+  }
+  if (!ID_NUMBER_REGEX.test(trimmed)) {
+    return { ok: false, message: "ID number must contain digits only." };
+  }
+  return { ok: true, value: trimmed };
+}
+
 const api = {
   async request(path, method = "GET", body) {
     const options = { method, headers: { "Content-Type": "application/json" } };

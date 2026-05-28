@@ -17,10 +17,26 @@
       <div class="card login-card">
         <div class="ballot-mark">New Voter</div>
         <label for="signupNameInput">Full Name</label>
-        <input id="signupNameInput" placeholder="Enter your full name" />
+        <input
+          id="signupNameInput"
+          placeholder="Enter your full name"
+          required
+          maxlength="100"
+          autocomplete="name"
+          pattern="[A-Za-z]+([ '-][A-Za-z]+)*"
+          title="Letters, spaces, hyphens, and apostrophes only"
+        />
 
         <label for="signupIdInput">ID Number</label>
-        <input id="signupIdInput" placeholder="Enter your ID number" />
+        <input
+          id="signupIdInput"
+          placeholder="Enter your ID number"
+          required
+          maxlength="20"
+          inputmode="numeric"
+          pattern="[0-9]+"
+          title="Digits only"
+        />
 
         <button id="signupButton">Create Account</button>
         <p id="signupMessage"></p>
@@ -42,14 +58,22 @@
         signupMessage.className = "";
         signupMessage.textContent = "";
 
-        const name = signupNameInput.value.trim();
-        const id_number = signupIdInput.value.trim();
-
-        if (!name || !id_number) {
+        const nameResult = validateFullName(signupNameInput.value);
+        if (!nameResult.ok) {
           signupMessage.className = "error";
-          signupMessage.textContent = "Please enter both name and ID number.";
+          signupMessage.textContent = nameResult.message;
           return;
         }
+
+        const idResult = validateIdNumber(signupIdInput.value);
+        if (!idResult.ok) {
+          signupMessage.className = "error";
+          signupMessage.textContent = idResult.message;
+          return;
+        }
+
+        const name = nameResult.value;
+        const id_number = idResult.value;
 
         try {
           signupButton.disabled = true;

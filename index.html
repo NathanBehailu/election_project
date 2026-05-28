@@ -17,10 +17,26 @@
       <div class="card login-card">
         <div class="ballot-mark">Ballot Ready</div>
         <label for="nameInput">Full Name</label>
-        <input id="nameInput" placeholder="Enter your full name" />
+        <input
+          id="nameInput"
+          placeholder="Enter your full name"
+          required
+          maxlength="100"
+          autocomplete="name"
+          pattern="[A-Za-z]+([ '-][A-Za-z]+)*"
+          title="Letters, spaces, hyphens, and apostrophes only"
+        />
 
         <label for="idInput">ID Number</label>
-        <input id="idInput" placeholder="Enter your ID number" />
+        <input
+          id="idInput"
+          placeholder="Enter your ID number"
+          required
+          maxlength="20"
+          inputmode="numeric"
+          pattern="[0-9]+"
+          title="Digits only"
+        />
 
         <button id="loginButton">Enter Election Portal</button>
         <p id="message"></p>
@@ -41,14 +57,22 @@
       loginButton.addEventListener("click", async () => {
         message.className = "";
         message.textContent = "";
-        const name = nameInput.value.trim();
-        const id_number = idInput.value.trim();
-
-        if (!name || !id_number) {
+        const nameResult = validateFullName(nameInput.value);
+        if (!nameResult.ok) {
           message.className = "error";
-          message.textContent = "Please enter both name and ID number.";
+          message.textContent = nameResult.message;
           return;
         }
+
+        const idResult = validateIdNumber(idInput.value);
+        if (!idResult.ok) {
+          message.className = "error";
+          message.textContent = idResult.message;
+          return;
+        }
+
+        const name = nameResult.value;
+        const id_number = idResult.value;
 
         try {
           loginButton.disabled = true;

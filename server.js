@@ -26,6 +26,49 @@ function toInt(value) {
   return Number.isNaN(num) ? 0 : num;
 }
 
+const FULL_NAME_REGEX = /^[A-Za-z]+(?:[ '-][A-Za-z]+)*$/;
+const ID_NUMBER_REGEX = /^\d+$/;
+const FULL_NAME_MIN_LENGTH = 2;
+const FULL_NAME_MAX_LENGTH = 100;
+const ID_NUMBER_MAX_LENGTH = 20;
+
+function validateFullName(name) {
+  const trimmed = String(name || "").trim();
+  if (!trimmed) {
+    return { ok: false, message: "Name and ID are required." };
+  }
+  if (trimmed.length < FULL_NAME_MIN_LENGTH || trimmed.length > FULL_NAME_MAX_LENGTH) {
+    return {
+      ok: false,
+      message: `Full name must be between ${FULL_NAME_MIN_LENGTH} and ${FULL_NAME_MAX_LENGTH} characters.`
+    };
+  }
+  if (!FULL_NAME_REGEX.test(trimmed)) {
+    return {
+      ok: false,
+      message: "Full name may only contain letters, spaces, hyphens, and apostrophes."
+    };
+  }
+  return { ok: true, value: trimmed };
+}
+
+function validateIdNumber(idNumber) {
+  const trimmed = String(idNumber || "").trim();
+  if (!trimmed) {
+    return { ok: false, message: "Name and ID are required." };
+  }
+  if (trimmed.length > ID_NUMBER_MAX_LENGTH) {
+    return {
+      ok: false,
+      message: `ID number must be at most ${ID_NUMBER_MAX_LENGTH} digits.`
+    };
+  }
+  if (!ID_NUMBER_REGEX.test(trimmed)) {
+    return { ok: false, message: "ID number must contain digits only." };
+  }
+  return { ok: true, value: trimmed };
+}
+
 async function getSettingsMap() {
   const { data, error } = await supabase.from("settings").select("key,value");
   if (error) throw error;
@@ -37,11 +80,16 @@ async function getSettingsMap() {
 
 app.post("/api/login", async (req, res) => {
   try {
-    const name = String(req.body.name || "").trim();
-    const idNumber = String(req.body.id_number || "").trim();
-    if (!name || !idNumber) {
-      return res.status(400).json({ success: false, message: "Name and ID are required." });
+    const nameResult = validateFullName(req.body.name);
+    if (!nameResult.ok) {
+      return res.status(400).json({ success: false, message: nameResult.message });
     }
+    const idResult = validateIdNumber(req.body.id_number);
+    if (!idResult.ok) {
+      return res.status(400).json({ success: false, message: idResult.message });
+    }
+    const name = nameResult.value;
+    const idNumber = idResult.value;
 
     const { data: user, error } = await supabase
       .from("users")
@@ -71,12 +119,16 @@ app.post("/api/login", async (req, res) => {
 
 app.post("/api/register", async (req, res) => {
   try {
-    const name = String(req.body.name || "").trim();
-    const idNumber = String(req.body.id_number || "").trim();
-
-    if (!name || !idNumber) {
-      return res.status(400).json({ success: false, message: "Name and ID number are required." });
+    const nameResult = validateFullName(req.body.name);
+    if (!nameResult.ok) {
+      return res.status(400).json({ success: false, message: nameResult.message });
     }
+    const idResult = validateIdNumber(req.body.id_number);
+    if (!idResult.ok) {
+      return res.status(400).json({ success: false, message: idResult.message });
+    }
+    const name = nameResult.value;
+    const idNumber = idResult.value;
 
     const { data: existingUserByIdNumber, error: existingUserByIdNumberError } = await supabase
       .from("users")
@@ -148,10 +200,18 @@ app.get("/api/parties", async (_req, res) => {
 
 app.post("/api/vote", async (req, res) => {
   try {
-    const name = String(req.body.name || "").trim();
-    const idNumber = String(req.body.id_number || "").trim();
+    const nameResult = validateFullName(req.body.name);
+    if (!nameResult.ok) {
+      return res.status(400).json({ success: false, message: nameResult.message });
+    }
+    const idResult = validateIdNumber(req.body.id_number);
+    if (!idResult.ok) {
+      return res.status(400).json({ success: false, message: idResult.message });
+    }
+    const name = nameResult.value;
+    const idNumber = idResult.value;
     const partyId = String(req.body.party_id || "").trim();
-    if (!name || !idNumber || !partyId) {
+    if (!partyId) {
       return res.status(400).json({ success: false, message: "Name, ID, and party are required." });
     }
 
